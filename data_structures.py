@@ -6,18 +6,34 @@ class SuburbMap:
     def __repr__(self):
         burb_list = ''
         for key, value in self.graph_dict.items():
-            burb_list += '{0}: {1}\n'.format(key.title(), ', '.join(value.get_burbs()).title())
+            burb_list += '{0}: '.format(key.title())
+            burbs = value.get_burbs()
+            for burb in burbs:
+                burb_list += '{0}, '.format(burb.name.title())
+            burb_list += '\n'
         return burb_list
         
 
     def add_suburb(self, suburb):
-        self.graph_dict[suburb.name] = suburb
+        if suburb.name in self.graph_dict:
+            print('Suburb already on record.')
+        else:
+            self.graph_dict[suburb.name] = suburb
 
     def add_adjacent(self, from_burb, adj_burb):
-        self.graph_dict[from_burb.name].add_adjacent(adj_burb.name)
-        self.graph_dict[adj_burb.name].add_adjacent(from_burb.name)
+        if from_burb not in adj_burb.get_burbs() and adj_burb not in from_burb.get_burbs():
+            self.graph_dict[from_burb.name].add_adjacent(adj_burb)
+            self.graph_dict[adj_burb.name].add_adjacent(from_burb)
+            print(f'{from_burb.name.title()} and {adj_burb.name.title()} were listed as adjacent to eachother.')
+        elif from_burb not in adj_burb.get_burbs() and adj_burb in from_burb.get_burbs():
+            self.graph_dict[adj_burb.name].add_adjacent(from_burb)
+            print(f'{from_burb.name.title()} was added as adjacent to {adj_burb.name.title()}.')
+        elif from_burb in adj_burb.get_burbs() and adj_burb not in from_burb.get_burbs():
+            self.graph_dict[from_burb.name].add_adjacent(adj_burb)
+            print(f'{adj_burb.name.title()} was added as adjacent to {from_burb.name.title()}.')
+        else:
+            print(f'{from_burb.name.title()} and {adj_burb.name.title()} are already listed as adjacent.')
 
-    
 class Suburb:
     def __init__(self, name):
         self.name = name
