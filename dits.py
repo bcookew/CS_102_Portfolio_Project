@@ -84,6 +84,7 @@ def add_adjacents():
         Please check input for typos or add {start_burb.title()} as a new suburb
         ''')
         add_adjacents()
+    print('Suburbs already listed as adjacent:', [burb.name.title() for burb in suburb_data.graph_dict[start_burb].get_burbs()])
     burbs_to_add = get_user_input(f'List the suburbs adjacent to {start_burb.title()} seperated by commas:\n')
     burbs_to_add_list = [burb.strip() for burb in burbs_to_add.split(',')]
     for burb in burbs_to_add_list:
@@ -93,7 +94,6 @@ def add_adjacents():
             continue
         suburb_data.add_adjacent(suburb_data.graph_dict[start_burb], suburb_data.graph_dict[burb])
     save_data(suburb_data, brunch_spots)
-    review()
     choice = get_user_input('Would you like to add more adjacencies?(yes/no): ')
     if choice in 'yes':
         add_adjacents()
