@@ -19,7 +19,7 @@ class SuburbMap:
 
     def add_suburb(self, suburb):
         if suburb.name in self.graph_dict:
-            print('Suburb already on record.')
+            print('Suburb already on record!')
         else:
             self.graph_dict[suburb.name] = suburb
 
@@ -63,15 +63,30 @@ class Restaurant:
         self.suburb = suburb
         self.has_view = has_view
         self.view = view
-        self.brunch = self.update_hours()
+        self.brunch = {}
 
-    def add_hours():
+    def add_hours(self):
         schedule = {'mon': {}, 'tues': {}, 'wed':{}, 'thurs': {}, 'fri': {}, 'sat': {}, 'sun': {}}
-        for key, value in schedule.items():
+        for key in schedule.keys():
             schedule[key]['start time'] = input(f'\nEnter the brunch menu start time for {key.title()} in 24hr format:\n')
+            schedule[key]['end time'] = input(f'\nEnter the brunch menu end time for {key.title()} in 24hr format:\n')
         return schedule
+
+    def __repr__(self) -> str:
+        string = '''
+{0}:'''.format(self.name.title())
+        for key, value in self.brunch.items():
+            string += '\n  {0}: '.format(key.title())
+            string += '{0} - {1}'.format(value['start time'], value['end time'])
+        return string
 
 class BrunchSpots:
     def __init__(self, name):
         self.name = name
         self.brunch_spots = {}
+
+    def add_brunch_spot(self, restaurant):
+        if restaurant in self.brunch_spots:
+            print('Restaurant already on record!')
+        else:
+            self.brunch_spots[restaurant.name] = restaurant

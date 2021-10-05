@@ -1,22 +1,95 @@
 import shelve
 from data_structures import SuburbMap, Suburb, BrunchSpots, Restaurant
 
-def greeting():
-    print('Welcome to the Data Input Terminal Service!')
-    print(
-        '''
-From this tool you can update 
-the Brunchify App with new 
-restaurants and suburbs.
-''')
-    
-def goodbye():
-    print(
-        '''
-Thank you for using the 
-Data Input Terminal Service!
-''')
-    input('Press Enter to Quit')
+
+### Main
+
+
+def run_dits():
+    greeting()
+    main_menu()
+
+
+### Menus
+
+
+def main_menu():
+    choices = {'modify suburb data': suburb_menu, 'modify restaurant data': restaurant_menu, 'backup data': backup_check, 'quit': goodbye}
+    print('_____Main Menu_____')
+    user_choice("Please choose from one of the following Menu options:", choices)
+
+def suburb_menu():
+    choices = {'review data': review_suburbs, 'add new suburb': add_suburb, 'add suburb adjacencies': add_adjacents,'backup data': backup_check, 'quit': goodbye}
+    print('_____Suburb Data Menu_____')
+    user_choice("Please choose from one of the following Menu options:", choices)    
+
+def restaurant_menu():
+    choices = {'review data': review_restaurants, 'add new restaurant': add_restaurant, 'main menu': main_menu, 'quit': goodbye}
+    print('_____Restaurant Data Menu_____')
+    user_choice("Please choose from one of the following Menu options:", choices)
+
+def review_suburbs():
+    suburb_data, restaurant_data = load_data()
+    print('\nSuburbs: \n{0}'.format(suburb_data))
+    main_menu()
+
+def review_restaurants():
+    suburb_data, restaurant_data = load_data()
+    print('\nRestaurants: \n{0}'.format(restaurant_data))
+    main_menu()
+
+
+### Suburb Functions
+
+
+def add_suburb():
+    suburb_map, restaurant_data = load_data()
+    burbs_to_add = clean_input(f'List the suburbs to add seperated by commas:\n')
+    burbs_to_add_list = [burb.strip() for burb in burbs_to_add.split(',')]
+    for burb in burbs_to_add_list:
+        new_suburb = Suburb(burb)
+        suburb_map.add_suburb(new_suburb)
+    save_data(suburb_map, restaurant_data)
+    print('Thank you for updating the suburb lists.')
+    choices = {'add more suburbs': add_suburb, 'add adjacencies': add_adjacents, 'main menu': main_menu, 'quit': goodbye}
+    user_choice('Would you like to add any more suburbs or adjacency details?:', choices)
+
+def add_adjacents():
+    suburb_data, restaurant_data = load_data()
+    from_burb = clean_input('What suburb do you want to add adjacent suburbs to?:\n' )
+    if from_burb not in suburb_data.graph_dict:
+        print(f'''
+        Either {from_burb.title()} does not yet exist in database or there has been a typo.
+        Please check input for typos or add {from_burb.title()} as a new suburb
+        ''')
+        add_adjacents()
+    print('Suburbs already listed as adjacent:', [burb.name.title() for burb in suburb_data.graph_dict[from_burb].get_burbs()])
+    burbs_to_add = clean_input(f'List the suburbs adjacent to {from_burb.title()} seperated by commas:\n')
+    burbs_to_add_list = [burb.strip() for burb in burbs_to_add.split(',')]
+    suburb_data.add_adjacent(suburb_data.graph_dict[from_burb], burbs_to_add_list)
+    save_data(suburb_data, restaurant_data)
+    choices = {'yes': add_adjacents, 'no': main_menu}
+    user_choice('Would you like to add more adjacencies?:', choices)
+
+
+### Restaurant Functions
+
+
+def add_restaurant():
+    suburb_data, restaurant_data = load_data()
+    r_name = clean_input('What is the name of the restaurant?')
+    r_address = clean_input('What is the street address?(without suburb or city)')
+    r_suburb = clean_input('What suburb is the restaurant in?')
+    r_has_view = input('Does it have a nice view?(True/False)').title()
+    r_view = clean_input('View type?(ie Seaside or Garden')
+    r = Restaurant(r_name, r_address, r_suburb, r_has_view, r_view)
+    restaurant_data.add_brunch_spot(r)
+    print(r)
+    restaurant_menu()
+
+
+### Utilities
+
 
 def load_data():
     try:
@@ -57,6 +130,10 @@ def make_backup():
     print('\nSuccess! Backup Created!\n')
     main_menu()
 
+
+### Helper Functions
+
+
 def clean_input(question):
     answer = input(question).lower().strip()
     if answer =='':
@@ -77,48 +154,32 @@ def user_choice(question, options):
         print("Sorry, that isn't an option from this menu.")
         return user_choice(question, options)
 
-def add_suburb():
-    suburb_map, brunch_spots = load_data()
-    burbs_to_add = clean_input(f'List the suburbs to add seperated by commas:\n')
-    burbs_to_add_list = [burb.strip() for burb in burbs_to_add.split(',')]
-    for burb in burbs_to_add_list:
-        new_suburb = Suburb(burb)
-        suburb_map.add_suburb(new_suburb)
-    save_data(suburb_map, brunch_spots)
-    print('Thank you for updating the suburb lists.')
-    choices = {'add more suburbs': add_suburb, 'add adjacencies': add_adjacents, 'main menu': main_menu, 'quit': goodbye}
-    user_choice('Would you like to add any more suburbs or adjacency details?:', choices)
+def greeting():
+    print('Welcome to the Data Input Terminal Service!')
+    print(
+        '''
+From this tool you can update 
+the Brunchify App with new 
+restaurants and suburbs.
+''')
+    
+def goodbye():
+    print(
+        '''
+Thank you for using the 
+Data Input Terminal Service!
+''')
+    input('Press Enter to Quit')
 
-def add_adjacents():
-    suburb_data, brunch_spots = load_data()
-    from_burb = clean_input('What suburb do you want to add adjacent suburbs to?:\n' )
-    if from_burb not in suburb_data.graph_dict:
-        print(f'''
-        Either {from_burb.title()} does not yet exist in database or there has been a typo.
-        Please check input for typos or add {from_burb.title()} as a new suburb
-        ''')
-        add_adjacents()
-    print('Suburbs already listed as adjacent:', [burb.name.title() for burb in suburb_data.graph_dict[from_burb].get_burbs()])
-    burbs_to_add = clean_input(f'List the suburbs adjacent to {from_burb.title()} seperated by commas:\n')
-    burbs_to_add_list = [burb.strip() for burb in burbs_to_add.split(',')]
-    suburb_data.add_adjacent(suburb_data.graph_dict[from_burb], burbs_to_add_list)
-    save_data(suburb_data, brunch_spots)
-    choices = {'yes': add_adjacents, 'no': main_menu}
-    user_choice('Would you like to add more adjacencies?:', choices)
 
-def main_menu():
-    top_menu = {'review data': review, 'add new suburb': add_suburb, 'add suburb adjacencies': add_adjacents,'backup data': backup_check, 'quit': goodbye}
-    print('_____Main Menu_____')
-    user_choice("Please choose from one of the following Menu options:", top_menu)    
 
-def review():
-    suburb_data, restaurant_data = load_data()
-    print('\nSuburbs: \n{0}'.format(suburb_data))
-    main_menu()
 
-def run_dits():
-    greeting()
-    main_menu()
+
+
+
+
+
+
 
 
 run_dits()
