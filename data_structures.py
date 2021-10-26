@@ -6,7 +6,7 @@ class SuburbMap:
     def __repr__(self):
         burb_list = ''
         for key, value in self.graph_dict.items():
-            burb_list += '{0}: '.format(key.title())
+            burb_list += '{0}:\n  '.format(key.title())
             burbs = value.get_burbs()
             for burb in burbs:
                 if burb == burbs[-1]:
@@ -53,6 +53,15 @@ class Suburb:
     def add_adjacent(self, suburb):
         self.adjacent_suburbs.append(suburb)
 
+    def add_restaurant_in_burb(self, restaurant):
+        if restaurant.name in self.brunch_spots:
+            print("A restaurant by that name is already listed in this suburb!")
+        else:
+            self.brunch_spots.append(restaurant.name)
+
+    def get_spots(self):
+        return self.brunch_spots
+
     def get_burbs(self):
         return self.adjacent_suburbs
 
@@ -63,21 +72,27 @@ class Restaurant:
         self.suburb = suburb
         self.has_view = has_view
         self.view = view
-        self.brunch = {}
+        self.brunch = self.add_hours()
 
     def add_hours(self):
-        schedule = {'mon': {}, 'tues': {}, 'wed':{}, 'thurs': {}, 'fri': {}, 'sat': {}, 'sun': {}}
+        schedule = {'mon': {}, 'tue': {}, 'wed':{}, 'thu': {}, 'fri': {}, 'sat': {}, 'sun': {}}
         for key in schedule.keys():
-            schedule[key]['start time'] = input(f'\nEnter the brunch menu start time for {key.title()} in 24hr format:\n')
-            schedule[key]['end time'] = input(f'\nEnter the brunch menu end time for {key.title()} in 24hr format:\n')
+            times_to_add = input(f'''\nEnter the brunch menu start time and end time 
+for {key.title()} in 24hr format seperated by a hyphen:\n''')
+            start_end_list = [int(time.strip()) for time in times_to_add.split('-')]
+            schedule[key]['start time'] = start_end_list[0]
+            schedule[key]['end time'] = start_end_list[1]
         return schedule
 
     def __repr__(self) -> str:
         string = '''
-{0}:'''.format(self.name.title())
+{0}:\n  Opening Hours:'''.format(self.name.title())
         for key, value in self.brunch.items():
-            string += '\n  {0}: '.format(key.title())
-            string += '{0} - {1}'.format(value['start time'], value['end time'])
+            string += '\n    {0}: '.format(key.title())
+            string += '{0} - {1}'.format(str(value['start time']), str(value['end time']))
+        string += '\n  Address:\n    {0}\n    {1}'.format(self.street_address.title(),self.suburb.name.title())
+        if self.has_view:
+            string += '\n  FYI:\n    {0} has a lovely {1} view.'.format(self.name.title(),self.view)
         return string
 
 class BrunchSpots:
@@ -86,7 +101,16 @@ class BrunchSpots:
         self.brunch_spots = {}
 
     def add_brunch_spot(self, restaurant):
-        if restaurant in self.brunch_spots:
+        if restaurant in self.brunch_spots.values():
             print('Restaurant already on record!')
         else:
             self.brunch_spots[restaurant.name] = restaurant
+
+    def __repr__(self) -> str:
+        string = '\nWellington Brunch Spots:'
+        for spot in self.brunch_spots.values():
+            string += '\n{0}'.format(spot.__repr__()) 
+        return string
+
+    def get_spots_list(self):
+        return self.brunch_spots

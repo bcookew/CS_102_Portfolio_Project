@@ -15,17 +15,17 @@ def run_dits():
 
 def main_menu():
     choices = {'modify suburb data': suburb_menu, 'modify restaurant data': restaurant_menu, 'backup data': backup_check, 'quit': goodbye}
-    print('_____Main Menu_____')
+    print('\n_____Main Menu_____')
     user_choice("Please choose from one of the following Menu options:", choices)
 
 def suburb_menu():
     choices = {'review data': review_suburbs, 'add new suburb': add_suburb, 'add suburb adjacencies': add_adjacents,'backup data': backup_check, 'quit': goodbye}
-    print('_____Suburb Data Menu_____')
+    print('\n_____Suburb Data Menu_____')
     user_choice("Please choose from one of the following Menu options:", choices)    
 
 def restaurant_menu():
     choices = {'review data': review_restaurants, 'add new restaurant': add_restaurant, 'main menu': main_menu, 'quit': goodbye}
-    print('_____Restaurant Data Menu_____')
+    print('\n_____Restaurant Data Menu_____')
     user_choice("Please choose from one of the following Menu options:", choices)
 
 def review_suburbs():
@@ -35,7 +35,7 @@ def review_suburbs():
 
 def review_restaurants():
     suburb_data, restaurant_data = load_data()
-    print('\nRestaurants: \n{0}'.format(restaurant_data))
+    print('\n{0}'.format(restaurant_data))
     main_menu()
 
 
@@ -76,16 +76,34 @@ def add_adjacents():
 
 
 def add_restaurant():
+    choices = {'add restaurant': add_restaurant, 'restaurant data menu': restaurant_menu, 
+            'main menu':main_menu, 'quit': quit}
     suburb_data, restaurant_data = load_data()
-    r_name = clean_input('What is the name of the restaurant?')
-    r_address = clean_input('What is the street address?(without suburb or city)')
-    r_suburb = clean_input('What suburb is the restaurant in?')
-    r_has_view = input('Does it have a nice view?(True/False)').title()
-    r_view = clean_input('View type?(ie Seaside or Garden')
+    r_name = clean_input('What is the name of the restaurant?\n')
+    if r_name in restaurant_data.get_spots_list():
+        print('''That restaurant is already on record!''')
+        user_choice('Would you like to add another restaurant?', choices)
+    r_address = clean_input('What is the street address?(without suburb or city)\n')
+    r_suburb_input = clean_input('What suburb is the restaurant in?\n')
+    r_suburb_input = check_valid_burb(r_suburb_input, suburb_data)
+    r_suburb = suburb_data.graph_dict[r_suburb_input]
+    r_has_view = clean_input('Does it have a nice view?(True/False)\n').title()
+    if r_has_view == 'True':
+        r_has_view = True
+        r_view = clean_input('View type?(ie Seaside or Garden)\n')
+    else:
+        r_has_view = False
+        r_view = None
     r = Restaurant(r_name, r_address, r_suburb, r_has_view, r_view)
     restaurant_data.add_brunch_spot(r)
+    suburb = suburb_data.graph_dict[r_suburb_input]
+    suburb.add_restaurant_in_burb(r)
     print(r)
-    restaurant_menu()
+    print(suburb.get_spots())
+    save_data(suburb_data, restaurant_data)
+    
+    user_choice('Would you like to add another restaurant?', choices)
+    
 
 
 ### Utilities
@@ -108,9 +126,9 @@ def load_data():
 
     return suburb_data, restaurant_data
         
-def save_data(suburb_map, brunch_spot_data):
+def save_data(suburb_map, restaurant_data):
     file = shelve.open('suburbs_and_restaurants', 'w')
-    file['restaurants'] = brunch_spot_data
+    file['restaurants'] = restaurant_data
     file['suburbs'] = suburb_map
     file.close()
 
@@ -133,6 +151,13 @@ def make_backup():
 
 ### Helper Functions
 
+def check_valid_burb(suburb, suburb_map):
+    if suburb in suburb_map.graph_dict:
+        return suburb
+    else:
+        suburb = clean_input('''Sorry, that suburb is not on record.
+        Please input an existing suburb: ''')
+        return check_valid_burb(suburb, suburb_map)
 
 def clean_input(question):
     answer = input(question).lower().strip()
@@ -182,4 +207,4 @@ Data Input Terminal Service!
 
 
 
-run_dits()
+restaurant_menu()
