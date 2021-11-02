@@ -152,6 +152,41 @@ class BrunchSpots:
     def get_spot(self, name):
         return self.brunch_spots[name]
     
+    def search_restaurant(self, search_term):
+        potential_matches = []
+        if search_term == "view":
+            potential_matches = []
+            for option in self.brunch_spots.values():
+                if option.has_view == True:
+                    potential_matches.append(option.name)
+                else: 
+                    continue
+            new_search_term = clean_input('There are many restaurants with lovely views. Please select from the following: ' + menu_option_formatter(potential_matches))
+            return self.search_restaurant(new_search_term)
+
+        else:
+            for option in self.brunch_spots.keys():
+                for option_index in range(len(option)):
+                    match_count = 0
+                    for search_index in range(len(search_term)):
+                        if search_index + option_index >= len(option):
+                            continue
+                        elif search_term[search_index] == option[search_index + option_index]:
+                            match_count += 1
+                        else:
+                            break
+                    if match_count == len(search_term) and match_count == len(option):
+                        return self.get_spot(option)
+                    elif match_count == len(search_term):
+                        potential_matches.append(option)
+            if len(potential_matches) == 0:
+                new_search_term = clean_input("Sorry, your input didn't match an option from this menu. Please try again:")
+                return self.search_restaurant(new_search_term)
+            elif len(potential_matches) == 1:
+                return self.get_spot(potential_matches[0])
+            else:
+                new_search_term = clean_input('Your input matched multiple options please select again.' + menu_option_formatter(potential_matches))
+                return self.search_restaurant(new_search_term)
 
 
 

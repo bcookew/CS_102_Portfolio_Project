@@ -1,6 +1,7 @@
 import shelve
 from data_structures import SuburbMap, Suburb, BrunchSpots, Restaurant
-
+from time import sleep
+from Utils import user_choice, clean_input, header
 
 ### Main
 
@@ -15,17 +16,17 @@ def run_dits():
 
 def main_menu():
     choices = {'modify suburb data': suburb_menu, 'modify restaurant data': restaurant_menu, 'backup data': backup_check, 'quit': goodbye}
-    print('\n_____Main Menu_____')
+    header('Main Menu')
     user_choice("Please choose from one of the following Menu options:", choices)
 
 def suburb_menu():
     choices = {'review data': review_suburbs, 'add new suburb': add_suburb, 'add suburb adjacencies': add_adjacents,'backup data': backup_check, 'quit': goodbye}
-    print('\n_____Suburb Data Menu_____')
+    header('Suburb Data Menu')
     user_choice("Please choose from one of the following Menu options:", choices)    
 
 def restaurant_menu():
     choices = {'review data': review_restaurants, 'add new restaurant': add_restaurant, 'main menu': main_menu, 'quit': goodbye}
-    print('\n_____Restaurant Data Menu_____')
+    header('Restaurant Data Menu')
     user_choice("Please choose from one of the following Menu options:", choices)
 
 def review_suburbs():
@@ -159,26 +160,6 @@ def check_valid_burb(suburb, suburb_map):
         Please input an existing suburb: ''')
         return check_valid_burb(suburb, suburb_map)
 
-def clean_input(question):
-    answer = input(question).lower().strip()
-    if answer =='':
-        print("Sorry, we didn't get that.")
-        return clean_input(question)
-    return answer
-
-def user_choice(question, options):
-    options_list = [option.title() for option in options]
-    options_str = " -- ".join(options_list)
-    answer = input(question + '\n' + options_str + '\n').lower().strip()
-    if answer =='':
-        print("Sorry, we didn't get that.")
-        return user_choice(question, options)
-    elif answer in options:
-        options[answer]()
-    else:
-        print("Sorry, that isn't an option from this menu.")
-        return user_choice(question, options)
-
 def greeting():
     print('Welcome to the Data Input Terminal Service!')
     print(
@@ -194,7 +175,7 @@ def goodbye():
 Thank you for using the 
 Data Input Terminal Service!
 ''')
-    input('Press Enter to Quit')
+    sleep(3)
 
 
 

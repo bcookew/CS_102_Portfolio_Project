@@ -50,7 +50,7 @@ def deduction(options, search_term):
                         match_count += 1
                     else:
                         break
-                if match_count > 1:
+                if match_count == len(search_term):
                     potential_matches.append(option)
         if len(potential_matches) == 0:
             new_search_term = clean_input("Sorry, your input didn't match an option from this menu. Please try again:" + menu_option_formatter(options))

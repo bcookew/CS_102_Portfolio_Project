@@ -1,6 +1,6 @@
 from time import sleep
 from data_structures import BrunchSpots, SuburbMap
-from Utils import header, menu_option_formatter, user_choice, deduction, load_data, clean_input
+from Utils import header, user_choice, deduction, load_data, clean_input
 
 # User Menus
 def main_menu():
@@ -37,6 +37,10 @@ def end_program():
 
 def restaurant_search():
     header('Restaurant Search')
+    r_searched = clean_input('''Please enter a restaurant name or part thereof or 
+type view to return a list of brunch spots with a nice view: ''')
+    r = restaurant_data.search_restaurant(r_searched)
+    print(r)
     
 
 def burb_search():
