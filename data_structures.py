@@ -1,3 +1,5 @@
+from Utils import header, menu_option_formatter, user_choice, load_data, clean_input
+
 class SuburbMap:
     def __init__(self, name):
         self.name = name
@@ -16,6 +18,33 @@ class SuburbMap:
             burb_list += '\n'
         return burb_list
         
+    def get_burb(self, burb_name):
+        return self.graph_dict[burb_name]
+
+    def search_suburb(self, search_term):
+        potential_matches = []
+        for option in self.graph_dict.keys():
+            for option_index in range(len(option)):
+                match_count = 0
+                for search_index in range(len(search_term)):
+                    if search_index + option_index >= len(option):
+                        continue
+                    elif search_term[search_index] == option[search_index + option_index]:
+                        match_count += 1
+                    else:
+                        break
+                if match_count == len(search_term) and match_count == len(option):
+                    return self.get_burb(option)
+                elif match_count == len(search_term):
+                    potential_matches.append(option)
+        if len(potential_matches) == 0:
+            new_search_term = clean_input("Sorry, your input didn't match an option from this menu. Please try again:")
+            return self.search_suburb(new_search_term)
+        elif len(potential_matches) == 1:
+            return self.get_burb(potential_matches[0])
+        else:
+            new_search_term = clean_input('Your input matched multiple options please select again.' + menu_option_formatter(potential_matches))
+            return self.search_suburb(new_search_term)
 
     def add_suburb(self, suburb):
         if suburb.name in self.graph_dict:
@@ -42,6 +71,11 @@ class SuburbMap:
                 print(f'{adj_burb.name.title()} was added as adjacent to {from_burb.name.title()}.')
             else:
                 print(f'{from_burb.name.title()} and {adj_burb.name.title()} are already listed as adjacent.')
+
+    def search_suburbs(self, searched, adjacent=False):
+        
+        pass
+
 
 
 class Suburb:
@@ -114,3 +148,10 @@ class BrunchSpots:
 
     def get_spots_list(self):
         return self.brunch_spots
+
+    def get_spot(self, name):
+        return self.brunch_spots[name]
+    
+
+
+

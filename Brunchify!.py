@@ -1,6 +1,7 @@
-import shelve
 from time import sleep
 from data_structures import BrunchSpots, SuburbMap
+from Utils import header, menu_option_formatter, user_choice, deduction, load_data, clean_input
+
 # User Menus
 def main_menu():
     header('Main Menu')
@@ -41,81 +42,38 @@ def restaurant_search():
 def burb_search():
     header('Suburb Search')
     searched_burb = clean_input('Please enter a suburb: ')
+    
+    burb = suburb_data.search_suburb(searched_burb)
+    spots = burb.get_spots()
+    if len(spots) == 0:
+        print('\nSorry, there are no brunch spots currently listed in {0}'.format(burb.name.title()))
+    else:
+        print("\n" + burb.name.title() + ' Brunch Spots:\n--------------------')
+
+    for spot in spots:
+        r = restaurant_data.get_spot(spot)
+        print(r)
+    
     opts = {'yes':True, 'no':False}
-    adjacent = deduction(opts, clean_input('Would you like to search the adjacent suburbs as well? ', opts))
-    suburb_data.
+    adjacent = opts[deduction(opts, clean_input('\nWould you like to search the adjacent suburbs as well? ', opts))]
+    if adjacent == True:
+        adjs = burb.get_burbs()
+        regrets = '\nSorry, there are no brunch spots currently listed in:'
+        regrets_count = 0
+        for adj in adjs:
+            spots_adj = adj.get_spots()
+            if len(spots_adj) == 0:
+                regrets_count += 1
+                regrets += "\n  - " + adj.name.title()
+                continue
+            print("\n" + adj.name.title() + ' Brunch Spots:\n--------------------')
+            for spot in spots_adj:
+                r = restaurant_data.get_spot(spot)
+                print(r)
+        if regrets_count > 0:
+            print(regrets)
     
     
-
-# Utilities
-def load_data():
-    try:
-        file = shelve.open('suburbs_and_restaurants', 'r')
-    except: 
-        print('Error while retreiving file!!!')
-    try:
-        suburb_data = file['suburbs']
-    except:
-        print('Error while retreiving Suburb Data!!!')
-    try:
-        restaurant_data = file['restaurants']
-    except:
-        print('Error while retreiving Restaurant Data!!!')
-    file.close()
-    try: 
-        return suburb_data, restaurant_data
-    except:
-        print('Fatal Error. Data could not be loaded!!!')
-        exit()
-
-def clean_input(question, options=None):
-    if options == None:
-        answer = input(question).lower().strip()
-    else:
-        answer = input(question + menu_option_formatter(options)).lower().strip()
-    if answer =='':
-        print("Sorry, we didn't get that.")
-        return clean_input(question)
-    return answer
-
-def user_choice(question, options):
-    answer = input(question + menu_option_formatter(options)).lower().strip()
-    if answer =='':
-        print("Sorry, we didn't get that.")
-        return user_choice(question, options)
-    else:
-        options[deduction(options, answer)]()
-        
-def deduction(options, search_term):
-        potential_matches = []
-        for option in options.keys():
-            for option_index in range(len(option)):
-                match_count = 0
-                for search_index in range(len(search_term)):
-                    if search_index + option_index >= len(option):
-                        continue
-                    elif search_term[search_index] == option[search_index + option_index]:
-                        match_count += 1
-                    else:
-                        break
-                if match_count > 1:
-                    potential_matches.append(option)
-        if len(potential_matches) == 0:
-            new_search_term = clean_input("Sorry, your input didn't match an option from this menu. Please try again:" + menu_option_formatter(options))
-            return deduction(options, new_search_term)
-        elif len(potential_matches) == 1:
-            return potential_matches[0]
-        else:
-            new_search_term = clean_input('Your input matched multiple options please select again.' + menu_option_formatter(potential_matches))
-            return deduction(options, new_search_term)
-    
-def menu_option_formatter(options_list):
-    options_list = [option.title() for option in options_list]
-    option_string = '\n{0}\n'.format(" -- ".join(options_list))
-    return option_string
-
-def header(header):
-    print("\n_____{0}_____\n".format(header))
 
 # Launch Script
 suburb_data, restaurant_data = load_data()
